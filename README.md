@@ -54,15 +54,13 @@ Stream Dock（AJAZZ / Mirabox）のキーとノブから、**Alexa の定型ア�
 
 ```mermaid
 flowchart TB
-    subgraph Mac
-        SD["Stream Dock アプリ<br>(キー・ノブ)"] -- WebSocket --> PL["このプラグイン<br>(Node.js)"]
-        PL -. "マイクのミュート<br>(任意・CoreAudio)" .-> MIC["🎙 既定のマイク"]
-        TOK[("~/.config/streamdock-alexa<br>ログイン情報")] --- PL
-    end
-    PL -- "HTTPS (非公式 API)" --> AX["Alexa クラウド"]
-    AX --> SK["各メーカーの Alexa スキル<br>(Tapo など)"]
-    SK --> DEV["💡 照明・🔌 プラグ<br>📺 赤外線リモコン家電"]
-    AX --> ECHO["🔊 Echo<br>(定型アクション・話しかけ)"]
+    SD["🎛 Stream Dock アプリ<br>キー・ノブ"] -- WebSocket --> PL["🧩 このプラグイン<br>Node.js・Mac 上で動作"]
+    PL -. "任意（CoreAudio）" .-> MIC["🎙 Mac の既定のマイク"]
+    TOK[("🔑 ログイン情報<br>~/.config/streamdock-alexa")] --- PL
+    PL -- "HTTPS（非公式 API）" --> AX["☁️ Alexa クラウド"]
+    AX --> SK["各メーカーの Alexa スキル<br>Tapo など"]
+    SK --> DEV["💡 照明　🔌 プラグ　📺 赤外線リモコン家電"]
+    AX --> ECHO["🔊 Echo<br>定型アクション・話しかけ"]
 ```
 
 | 操作 | 流れ | かかる時間の目安 |
