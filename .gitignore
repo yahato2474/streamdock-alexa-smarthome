@@ -1,0 +1,8 @@
+node_modules/
+io.github.yahato2474.alexa.sdPlugin/bin/
+io.github.yahato2474.alexa.sdPlugin/log/
+*.log
+.DS_Store
+# never commit a login
+alexa.json
+formerDataStore.json

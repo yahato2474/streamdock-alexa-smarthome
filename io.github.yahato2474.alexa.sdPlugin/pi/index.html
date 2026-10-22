@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="pi.css">
+  <script src="common.js"></script>
+</head>
+<body>
+  <div class="row" data-for="power brightness">
+    <label data-t="device"></label>
+    <div class="value"><select id="device"></select></div>
+  </div>
+  <div class="row" data-for="power">
+    <label data-t="onPress"></label>
+    <div class="value"><select id="mode">
+      <option value="toggle" data-t="toggle"></option>
+      <option value="on" data-t="turnOn"></option>
+      <option value="off" data-t="turnOff"></option>
+    </select></div>
+  </div>
+  <div class="row" data-for="brightness">
+    <label data-t="step"></label>
+    <div class="value"><select id="step">
+      <option value="5">5%</option>
+      <option value="10">10%</option>
+      <option value="20">20%</option>
+    </select></div>
+  </div>
+  <div class="row" data-for="brightness">
+    <label data-t="onPush"></label>
+    <div class="value"><select id="press">
+      <option value="power" data-t="togglePower"></option>
+      <option value="mic" data-t="toggleMic"></option>
+    </select></div>
+  </div>
+  <div class="row" data-for="brightness" id="micWarnRow" hidden>
+    <label></label>
+    <div class="value hint warn" data-t="micMissing"></div>
+  </div>
+  <div class="row" data-for="routine">
+    <label data-t="routine"></label>
+    <div class="value"><select id="routine"></select></div>
+  </div>
+  <div class="row" data-for="text">
+    <label data-t="phrase"></label>
+    <div class="value"><input type="text" id="text"></div>
+  </div>
+  <div class="row" data-for="routine text">
+    <label data-t="echo"></label>
+    <div class="value"><select id="echo"></select></div>
+  </div>
+  <div class="row" data-for="power brightness routine text">
+    <label data-t="label"></label>
+    <div class="value"><input type="text" id="label"></div>
+  </div>
+  <div class="row">
+    <label data-t="status"></label>
+    <div class="value status" id="status"></div>
+  </div>
+  <div class="row" id="loginRow" hidden>
+    <label></label>
+    <div class="value"><button id="login" data-t="login"></button></div>
+  </div>
+<script>
+  const T = {
+    en: {
+      device: 'Device', onPress: 'On press', toggle: 'Toggle on/off', turnOn: 'Turn on', turnOff: 'Turn off',
+      step: 'Step', onPush: 'On push', togglePower: 'Toggle power', toggleMic: 'Mute / unmute microphone',
+      micMissing: 'Microphone mute needs bin/micmute. Re-run install.sh with Xcode Command Line Tools installed.',
+      routine: 'Routine', phrase: 'Phrase', echo: 'Echo device', label: 'Label', status: 'Status', login: 'Log in to Amazon',
+      choose: 'Choose…', autoEcho: 'Automatic (online Echo)', missing: ' (not found)', loading: 'Loading…',
+      notLoggedIn: 'Not logged in to Alexa', counts: (d, r, region) => `${d} devices / ${r} routines (${region})`,
+      phrasePh: 'e.g. turn on the air conditioner', labelPh: 'Defaults to the device / routine name',
+    },
+    ja: {
+      device: '機器', onPress: '押したとき', toggle: 'ON/OFF 切替', turnOn: 'ON にする', turnOff: 'OFF にする',
+      step: '1目盛り', onPush: '押し込み', togglePower: '電源を切替', toggleMic: 'マイクのミュート切替',
+      micMissing: 'マイクのミュートには bin/micmute が必要です。Xcode Command Line Tools を入れてから install.sh を再実行してください。',
+      routine: '定型アクション', phrase: '話す内容', echo: '実行する Echo', label: '表示名', status: '状態', login: 'Amazon にログイン',
+      choose: '選択してください', autoEcho: '自動（オンラインの Echo）', missing: '（見つかりません）', loading: '読み込み中…',
+      notLoggedIn: 'Alexa に未ログインです', counts: (d, r, region) => `機器 ${d} 件 / 定型アクション ${r} 件（${region}）`,
+      phrasePh: '例: エアコンをつけて', labelPh: '空欄なら機器名・定型アクション名',
+    },
+  };
+  const $ = id => document.getElementById(id);
+  const kind = () => (PI.action || '').split('.').pop();
+  const tr = () => T[String(PI.language).slice(0, 2)] || T.en;
+  let lists = null;
+
+  function translate() {
+    const t = tr();
+    document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t[el.dataset.t]; });
+    $('text').placeholder = t.phrasePh;
+    $('label').placeholder = t.labelPh;
+    if (!lists) $('status').textContent = t.loading;
+  }
+
+  function fill(sel, values, current, placeholder) {
+    sel.innerHTML = '';
+    const opts = [['', placeholder], ...values.map(v => [v, v])];
+    if (current && !values.includes(current)) opts.push([current, current + tr().missing]);
+    for (const [v, text] of opts) {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = text;
+      sel.appendChild(o);
+    }
+    sel.value = current || '';
+  }
+
+  function show() {
+    const s = PI.settings, t = tr();
+    document.querySelectorAll('[data-for]').forEach(r => {
+      r.hidden = !r.dataset.for.split(' ').includes(kind()) || (r.id === 'micWarnRow' && !(s.press === 'mic' && lists && !lists.micAvailable));
+    });
+    $('mode').value = s.mode || 'toggle';
+    $('step').value = String(s.step || 10);
+    $('press').value = s.press || 'power';
+    $('text').value = s.text || '';
+    $('label').value = s.label || '';
+    if (lists && lists.loggedIn && !lists.error) {
+      const ents = kind() === 'brightness' ? lists.entities.filter(e => e.kind === 'light') : lists.entities;
+      fill($('device'), ents.map(e => e.name), s.device, t.choose);
+      fill($('routine'), lists.routines, s.routine, t.choose);
+      fill($('echo'), lists.echoes, s.echo, t.autoEcho);
+    }
+  }
+
+  PI.onSettings = () => { translate(); show(); if (!lists) PI.toPlugin({ cmd: 'lists' }); };
+  PI.onPluginMessage = p => {
+    if (p.cmd !== 'lists') return;
+    const t = tr();
+    lists = p;
+    $('loginRow').hidden = !!p.loggedIn;
+    $('status').textContent = !p.loggedIn ? t.notLoggedIn
+      : p.error ? 'Error: ' + p.error
+      : t.counts(p.entities.length, p.routines.length, p.region);
+    show();
+  };
+
+  for (const id of ['device', 'mode', 'press', 'routine', 'echo']) {
+    $(id).addEventListener('change', e => { PI.save({ [id]: e.target.value }); show(); });
+  }
+  $('step').addEventListener('change', e => PI.save({ step: Number(e.target.value) }));
+  $('text').addEventListener('change', e => PI.save({ text: e.target.value.trim() }));
+  $('label').addEventListener('change', e => PI.save({ label: e.target.value.trim() }));
+  $('login').addEventListener('click', () => PI.toPlugin({ cmd: 'login' }));
+</script>
+</body>
+</html>

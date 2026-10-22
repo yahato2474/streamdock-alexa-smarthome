@@ -1,0 +1,23 @@
+{
+  "name": "streamdock-alexa-smarthome",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stream Dock plugin: control Alexa smart-home devices (Tapo etc.) and run Alexa routines from keys and knobs",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node tools/patch-alexa-cookie.js",
+    "test": "node --test test/unit/*.test.js",
+    "login": "node tools/login.js",
+    "list": "node tools/list.js"
+  },
+  "dependencies": {
+    "alexa-remote2": "8.1.1",
+    "ws": "^8.18.0"
+  },
+  "overrides": {
+    "alexa-cookie2": "5.0.6"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

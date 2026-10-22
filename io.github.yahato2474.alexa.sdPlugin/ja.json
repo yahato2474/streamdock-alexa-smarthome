@@ -1,0 +1,21 @@
+{
+  "Name": "Alexa スマートホーム",
+  "Description": "Alexa の定型アクションやスマートホーム機器（Tapo など）を Stream Dock のキーとノブで操作します",
+  "Category": "Alexa スマートホーム",
+  "io.github.yahato2474.alexa.routine": {
+    "Name": "Alexa 定型アクション",
+    "Tooltip": "Alexa の定型アクションを実行します"
+  },
+  "io.github.yahato2474.alexa.power": {
+    "Name": "スマートホーム電源",
+    "Tooltip": "Alexa に登録された機器（Tapo のプラグ・LED テープ・赤外線リモコンなど）の ON/OFF、またはシーンを実行します"
+  },
+  "io.github.yahato2474.alexa.brightness": {
+    "Name": "スマートホーム明るさ",
+    "Tooltip": "回すと明るさを調整し、押すと電源（またはマイクのミュート）を切り替えます"
+  },
+  "io.github.yahato2474.alexa.text": {
+    "Name": "Alexa に話しかける（テキスト）",
+    "Tooltip": "「エアコンをつけて」などの文を、Alexa に話しかけたのと同じように送ります"
+  }
+}
