@@ -53,7 +53,7 @@ Stream Dock（AJAZZ / Mirabox）のキーとノブから、**Alexa の定型ア�
 このプラグインは Tapo などの機器に直接つなぐのではなく、**Alexa を経由**して操作します。そのため、Alexa アプリで操作できる機器なら、メーカーを問わず使えます。
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph Mac
         SD["Stream Dock アプリ<br>(キー・ノブ)"] -- WebSocket --> PL["このプラグイン<br>(Node.js)"]
         PL -. "マイクのミュート<br>(任意・CoreAudio)" .-> MIC["🎙 既定のマイク"]
